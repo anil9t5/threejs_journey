@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import GUI from "lil-gui";
+import gsap from "gsap";
 
 /**
  * Debug
@@ -172,8 +173,21 @@ window.addEventListener("mousemove", (event) => {
  */
 
 let scrollY = window.scrollY;
+let currentSection = 0;
+
 window.addEventListener("scroll", () => {
   scrollY = window.scrollY;
+  const newSection = Math.round(scrollY / sizes.height);
+
+  if (currentSection != newSection) {
+    currentSection = newSection;
+    gsap.to(sectionMeshes[currentSection].rotation, {
+      duration: 1.5,
+      ease: "power2.inOut",
+      x: "+=6",
+      y: "+=3",
+    });
+  }
 });
 
 /**
@@ -188,7 +202,7 @@ const tick = () => {
   previousTime = elapsedTime;
 
   // Animate camera
-  camera.position.y = (-scrollY / sizes.height) * objectsDistance;
+  camera.position.y = (-scrollY / sizes.height) * objectsDistance; // Camera scroll from -0 to -8 since the objectDistance value is 4...i.e 1 unit each
 
   const parallaxX = cursor.x * 0.5;
   const parallaxY = -cursor.y * 0.5;
@@ -199,8 +213,8 @@ const tick = () => {
 
   //Animate meshes
   for (const mesh of sectionMeshes) {
-    mesh.rotation.x = elapsedTime * 0.1; //Reduce the speed by multiplying by 0.1
-    mesh.rotation.y = elapsedTime * 0.12;
+    mesh.rotation.x += deltaTime * 0.1; //Reduce the speed by multiplying by 0.1
+    mesh.rotation.y += deltaTime * 0.12;
   }
 
   // Render
