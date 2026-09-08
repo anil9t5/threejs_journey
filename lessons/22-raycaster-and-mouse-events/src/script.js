@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import GUI from "lil-gui";
 
 /**
@@ -13,6 +14,29 @@ const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
+
+/**
+ * Model
+ */
+const gltfLoader = new GLTFLoader();
+let model = null;
+gltfLoader.load("./models/Duck/glTF-Binary/Duck.glb", (gltf) => {
+  model = gltf.scene;
+  model.position.y = -1.2;
+  scene.add(model);
+});
+
+/**
+ * Lights
+ */
+// Ambient light
+const ambientLight = new THREE.AmbientLight("#ffffff", 0.9);
+scene.add(ambientLight);
+
+// Directional light
+const directionalLight = new THREE.DirectionalLight("#ffffff", 2.1);
+directionalLight.position.set(1, 2, 3);
+scene.add(directionalLight);
 
 /**
  * Objects
@@ -98,7 +122,7 @@ window.addEventListener("mousemove", (event) => {
   mouse.x = (event.clientX / sizes.width) * 2 - 1;
   mouse.y = -(event.clientY / sizes.height) * 2 + 1;
 
-  console.log(mouse);
+  // console.log(mouse);
 });
 
 let currentIntersect = null;
@@ -148,6 +172,16 @@ const tick = () => {
   for (const object of objectsToTest) {
     if (!intersects.find((intersect) => intersect.object === object)) {
       object.material.color.set("#ff0000");
+    }
+  }
+
+  if (model) {
+    const modelIntersects = raycaster.intersectObject(model);
+
+    if (modelIntersects.length) {
+      model.scale.set(1.2, 1.2, 1.2);
+    } else {
+      model.scale.set(1, 1, 1);
     }
   }
 
