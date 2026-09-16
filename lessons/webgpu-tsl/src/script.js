@@ -1,4 +1,14 @@
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import {
+  sin,
+  positionLocal,
+  time,
+  vec3,
+  float,
+  checker,
+  uv,
+  vec2,
+} from "three/tsl";
 import * as THREE from "three/webgpu";
 
 /**
@@ -84,11 +94,23 @@ renderer.setClearColor(0x111111);
 }
 
 /**
- * Dummy
+ * Torus knot
  */
 {
   const geometry = new THREE.TorusKnotGeometry(0.5, 0.24, 128, 32);
-  const material = new THREE.MeshStandardMaterial();
+  const material = new THREE.MeshStandardNodeMaterial({
+    color: 0xff0000,
+    metalness: 0.5,
+    roughness: 0.25,
+  });
+  const pattern = checker(uv().add(time.mul(0.02)).mul(vec2(40, 5)));
+  material.colorNode = vec3(pattern, 0.4, 0.1);
+  material.roughnessNode = float(0.5);
+
+  const zOffset = sin(time.add(positionLocal.y.mul(3))).mul(0.4);
+
+  material.positionNode = positionLocal.add(vec3(0, 0, zOffset));
+
   const mesh = new THREE.Mesh(geometry, material);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
