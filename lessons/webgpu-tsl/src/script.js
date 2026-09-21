@@ -82,12 +82,18 @@ renderer.setClearColor(0x111111);
  * Floor
  */
 {
-  const texture = textureLoader.load("./floor-color.jpg");
-  texture.colorSpace = THREE.SRGBColorSpace;
-  const mesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10),
-    new THREE.MeshStandardMaterial({ map: texture }),
-  );
+  const textureColor = textureLoader.load("./floor-color.jpg");
+  textureColor.colorSpace = THREE.SRGBColorSpace;
+
+  const geometry = new THREE.PlaneGeometry(10, 10, 10, 10);
+
+  const material = new THREE.MeshStandardNodeMaterial({
+    map: textureColor,
+    transparent: true,
+  });
+  const fade = uv().sub(0.5).length().smoothstep(0.5, 0.2);
+  material.opacityNode = fade;
+  const mesh = new THREE.Mesh(geometry, material);
   mesh.rotation.x = -Math.PI * 0.5;
   mesh.receiveShadow = true;
   scene.add(mesh);
