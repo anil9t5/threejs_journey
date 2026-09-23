@@ -8,6 +8,8 @@ import {
   checker,
   uv,
   vec2,
+  vec4,
+  materialColor,
 } from "three/tsl";
 import * as THREE from "three/webgpu";
 
@@ -78,6 +80,8 @@ renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0x111111);
 
+const pattern = checker(uv().add(time.mul(0.02)).mul(vec2(4, 4)));
+
 /**
  * Floor
  */
@@ -90,9 +94,12 @@ renderer.setClearColor(0x111111);
   const material = new THREE.MeshStandardNodeMaterial({
     map: textureColor,
     transparent: true,
+    color: "red",
   });
   const fade = uv().sub(0.5).length().smoothstep(0.5, 0.2);
   material.opacityNode = fade;
+
+  material.colorNode = materialColor.mul(pattern);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.rotation.x = -Math.PI * 0.5;
   mesh.receiveShadow = true;
@@ -109,9 +116,11 @@ renderer.setClearColor(0x111111);
     metalness: 0.5,
     roughness: 0.25,
   });
-  const pattern = checker(uv().add(time.mul(0.02)).mul(vec2(40, 5)));
+
   material.colorNode = vec3(pattern, 0.4, 0.1);
   material.roughnessNode = float(0.5);
+
+  material.outputNode = vec4(positionLocal, 1);
 
   const zOffset = sin(time.add(positionLocal.y.mul(3))).mul(0.4);
 
