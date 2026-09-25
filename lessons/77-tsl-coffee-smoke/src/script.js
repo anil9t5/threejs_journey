@@ -2,7 +2,18 @@ import * as THREE from "three/webgpu";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Inspector } from "three/addons/inspector/Inspector.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { Fn, positionLocal, rotate } from "three/tsl";
+import {
+  Fn,
+  positionLocal,
+  rotate,
+  time,
+  mx_noise_vec3,
+  vec3,
+  uv,
+  mx_noise_float,
+  vec2,
+  min,
+} from "three/tsl";
 
 /**
  * Base
@@ -91,19 +102,35 @@ scene.add(model.scene);
     side: THREE.DoubleSide,
     transparent: true,
     depthWrite: false,
-    wireframe: true,
+    wireframe: false,
   });
 
   //Position to move the vertices
-  material.positionNode = Fn(() => {
-    const newPosition = positionLocal;
+  // material.positionNode = Fn(() => {
+  //   const newPosition = positionLocal;
 
-    //Twist
-    const angle = newPosition.y;
+  //   //Twist
+  //   //const angle = newPosition.y.mul(0.3).sub(time.mul(0.2)).sin().mul(3);
 
-    newPosition.xz.assign(rotate(newPosition.xz, angle));
-    return newPosition;
-  })();
+  //   //newPosition.xz.assign(rotate(newPosition.xz, angle));
+
+  //   const windCoordinates = newPosition.sub(vec3(0, time.mul(0.3), 0)).mul(0.4);
+  //   const windStrength = uv().y.mul(5);
+  //   const wind = mx_noise_vec3(windCoordinates).mul(windStrength);
+  //   newPosition.addAssign(wind);
+  //   return newPosition;
+  // })();
+
+  //Opacity
+  const smoke = mx_noise_float(uv().mul(vec2(3, 2)).sub(time.mul(0.1)));
+
+  const edgeFade = min(
+    uv().y.mul(10),
+    uv().y.oneMinus(),
+    uv().x.mul(5),
+    uv().x.oneMinus().mul(4),
+  );
+  material.opacityNode = edgeFade;
 
   // Mesh
   const mesh = new THREE.Mesh(geometry, material);
