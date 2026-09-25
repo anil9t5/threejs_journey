@@ -4,11 +4,13 @@ import { Inspector } from "three/addons/inspector/Inspector.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
   Fn,
+  mul,
   positionLocal,
   rotate,
   time,
   mx_noise_vec3,
   vec3,
+  vec4,
   uv,
   mx_noise_float,
   vec2,
@@ -103,34 +105,39 @@ scene.add(model.scene);
     transparent: true,
     depthWrite: false,
     wireframe: false,
+    color: 0xc1c1c1,
   });
 
   //Position to move the vertices
-  // material.positionNode = Fn(() => {
-  //   const newPosition = positionLocal;
+  material.positionNode = Fn(() => {
+    const newPosition = positionLocal;
 
-  //   //Twist
-  //   //const angle = newPosition.y.mul(0.3).sub(time.mul(0.2)).sin().mul(3);
+    //Twist
+    const angle = newPosition.y.mul(0.3).sub(time.mul(0.2)).sin().mul(3);
 
-  //   //newPosition.xz.assign(rotate(newPosition.xz, angle));
+    newPosition.xz.assign(rotate(newPosition.xz, angle));
 
-  //   const windCoordinates = newPosition.sub(vec3(0, time.mul(0.3), 0)).mul(0.4);
-  //   const windStrength = uv().y.mul(5);
-  //   const wind = mx_noise_vec3(windCoordinates).mul(windStrength);
-  //   newPosition.addAssign(wind);
-  //   return newPosition;
-  // })();
+    const windCoordinates = newPosition.sub(vec3(0, time.mul(0.3), 0)).mul(0.4);
+    const windStrength = uv().y.mul(5);
+    const wind = mx_noise_vec3(windCoordinates).mul(windStrength);
+    newPosition.addAssign(wind);
+    return newPosition;
+  })();
 
   //Opacity
-  const smoke = mx_noise_float(uv().mul(vec2(3, 2)).sub(time.mul(0.1)));
+  const smoke = mx_noise_float(
+    uv()
+      .mul(vec2(3, 2))
+      .sub(vec2(0, time.mul(0.1))),
+  );
 
   const edgeFade = min(
-    uv().y.mul(10),
-    uv().y.oneMinus(),
-    uv().x.mul(5),
-    uv().x.oneMinus().mul(4),
+    uv().y.mul(10), // Bottom
+    uv().y.oneMinus(), // Top
+    uv().x.mul(5), // Left
+    uv().x.oneMinus().mul(4), // Right
   );
-  material.opacityNode = edgeFade;
+  material.opacityNode = mul(smoke, edgeFade).clamp(0, 1);
 
   // Mesh
   const mesh = new THREE.Mesh(geometry, material);
