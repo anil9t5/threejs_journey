@@ -59,9 +59,11 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100,
 );
-camera.position.x = 5;
-camera.position.y = 4.5;
-camera.position.z = 2.5;
+// camera.position.x = 5;
+// camera.position.y = 4.5;
+// camera.position.z = 2.5;
+camera.position.set(0, 0, 20);
+camera.lookAt(0, 0, 0);
 scene.add(camera);
 
 // Controls
@@ -84,15 +86,17 @@ renderer.setClearColor(0x111111);
 
 //TSL Material
 
-const pulse = time.mul(2.0).sin().mul(0.5).add(0.5);
+const pulse = time.mul(2).sin();
 const colorRed = vec3(1, 0, 0);
 const colorBlue = vec3(0, 0, 1);
 
-const mixFactor = positionLocal.y;
+const mixFactor = positionLocal.y.add(pulse);
 const mixFactorCube = uv().y;
 
+const wobbleFreq = positionLocal.y.mul(3);
+
 const colorMix = mix(colorBlue, colorRed, mixFactor).mul(pulse);
-const colorMixCube = mix(colorBlue, colorRed, mixFactorCube).mul(pulse);
+const colorMixCube = mix(colorBlue, colorRed, mixFactor);
 
 /**
  * Torus knot
@@ -121,8 +125,17 @@ const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshStandardNodeMaterial({ color: 0x00ff00 }); // Solid Green
 
 material.colorNode = colorMixCube;
+material.positionNode = positionLocal.add(
+  vec3(
+    positionLocal.x.add(wobbleFreq.add(time).sin()),
+    positionLocal.y,
+    positionLocal.z,
+  ),
+);
+
 const cube = new THREE.Mesh(geometry, material);
 cube.position.y = -0.5;
+cube.position.set(0, 0, 0);
 scene.add(cube);
 
 /**
