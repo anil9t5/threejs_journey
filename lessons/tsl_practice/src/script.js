@@ -93,7 +93,7 @@ const colorBlue = vec3(0, 0, 1);
 const mixFactor = positionLocal.y.add(pulse);
 const mixFactorCube = uv().y;
 
-const wobbleFreq = positionLocal.y.mul(3);
+const wobbleFreq = positionLocal.y.mul(3).add(time.mul(3)).sin();
 
 const colorMix = mix(colorBlue, colorRed, mixFactor).mul(pulse);
 const colorMixCube = mix(colorBlue, colorRed, mixFactor);
@@ -121,13 +121,13 @@ const colorMixCube = mix(colorBlue, colorRed, mixFactor);
 /**
  * Box
  */
-const geometry = new THREE.BoxGeometry(1, 1, 1);
+const geometry = new THREE.BoxGeometry(1, 1, 1, 1, 20, 1);
 const material = new THREE.MeshStandardNodeMaterial({ color: 0x00ff00 }); // Solid Green
 
 material.colorNode = colorMixCube;
 material.positionNode = positionLocal.add(
   vec3(
-    positionLocal.x.add(wobbleFreq.add(time).sin()),
+    positionLocal.x.add(wobbleFreq).mul(0.2),
     positionLocal.y,
     positionLocal.z,
   ),
